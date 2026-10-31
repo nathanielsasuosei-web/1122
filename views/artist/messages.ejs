@@ -1,0 +1,46 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+<div class="wrap shell">
+  <%- include('../partials/dash-nav') %>
+  <div>
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Direct line</div>
+        <h1>Messages</h1>
+        <p>Talk to <%= studio.producer %> about custom beats, stems or collabs. Every message is also emailed.</p>
+      </div>
+    </div>
+    <%- include('../partials/flash') %>
+    <div class="panel" style="overflow:hidden">
+      <div class="panel-head">
+        <h2>Conversation with the studio</h2>
+        <span class="chip chip-green">Email notifications on</span>
+      </div>
+      <div class="chat">
+        <div class="chat-log" id="chatLog">
+          <% if (!thread.length) { %>
+            <div class="empty" style="margin:auto">
+              <h3>No messages yet</h3>
+              <p>Say hi — ask about a custom beat, stems, or a bundle deal.</p>
+            </div>
+          <% } %>
+          <% thread.forEach(function (m) { %>
+            <div class="bubble <%= m.sender === 'artist' ? 'me' : 'them' %>">
+              <div><%= m.body %></div>
+              <div class="meta"><%= m.sender === 'artist' ? 'You' : studio.producer %> · <%= (m.created_at || '').slice(0, 16) %></div>
+            </div>
+          <% }) %>
+        </div>
+        <form class="chat-form" method="post" action="/dashboard/messages">
+          <input class="input" name="body" placeholder="Write a message…" autocomplete="off" required maxlength="4000">
+          <button class="btn btn-primary" type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:12px">Messages are delivered to the producer's dashboard and emailed to <strong><%= smtpOn ? 'his inbox' : 'the studio mailbox' %></strong>.</p>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

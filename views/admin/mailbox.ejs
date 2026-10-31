@@ -1,0 +1,71 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+<div class="wrap shell">
+  <%- include('../partials/dash-nav') %>
+  <div>
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Outbox</div>
+        <h1>Mailbox</h1>
+        <p>Every email the app generates is stored here<%= smtpOn ? ' and delivered by SMTP.' : ' — no SMTP configured, so this is the delivery record.' %></p>
+      </div>
+      <span class="badge <%= smtpOn ? 'paid' : 'pending' %>"><%= smtpOn ? 'SMTP live' : 'Offline mode' %></span>
+    </div>
+
+    <% if (!smtpOn) { %>
+      <div class="notice" style="margin-bottom:18px">
+        <span>✉</span>
+        <div><strong>Emails are being captured, not sent.</strong> Add SMTP credentials in <a href="/admin/settings" style="color:var(--cyan);font-weight:600">Settings</a> to deliver them for real. Everything below is exactly what the artist would receive.</div>
+      </div>
+    <% } %>
+
+    <div class="pill-tabs" style="margin-bottom:18px">
+      <a href="/admin/mailbox" class="<%= category === 'all' ? 'active' : '' %>">All</a>
+      <% categories.forEach(function (c) { %>
+        <a href="/admin/mailbox?category=<%= c.category %>" class="<%= category === c.category ? 'active' : '' %>"><%= c.category %> (<%= c.c %>)</a>
+      <% }) %>
+    </div>
+
+    <% if (!mails.length) { %>
+      <div class="panel empty">
+        <h3>No emails yet</h3>
+        <p>Place a test order or send a message — emails appear here instantly.</p>
+      </div>
+    <% } else { %>
+      <div class="split-2" style="grid-template-columns:minmax(0,340px) minmax(0,1fr);align-items:start">
+        <div class="panel" style="overflow:hidden;max-height:720px;overflow-y:auto">
+          <% mails.forEach(function (m) { %>
+            <a class="mail-item <%= selected && selected.id === m.id ? 'active' : '' %>" href="/admin/mailbox?id=<%= m.id %><%= category !== 'all' ? '&category=' + category : '' %>">
+              <div class="mi-sub"><span><%= m.subject %></span></div>
+              <div class="mi-meta"><%= m.to_email %> · <%= (m.created_at || '').slice(0, 16) %></div>
+              <div style="margin-top:6px;display:flex;gap:6px">
+                <span class="chip chip-violet" style="font-size:.62rem"><%= m.category %></span>
+                <span class="chip <%= m.sent ? 'chip-green' : (m.error ? 'chip-red' : '') %>" style="font-size:.62rem"><%= m.sent ? 'sent' : (m.error ? 'error' : 'queued') %></span>
+              </div>
+            </a>
+          <% }) %>
+        </div>
+        <div class="panel" style="overflow:hidden">
+          <% if (selected) { %>
+            <div class="panel-head" style="flex-direction:column;align-items:start;gap:6px">
+              <h2 style="font-size:1rem"><%= selected.subject %></h2>
+              <div class="muted" style="font-size:.8rem">To: <strong style="color:#fff"><%= selected.to_name || selected.to_email %></strong> &lt;<%= selected.to_email %>&gt; · <%= (selected.created_at || '').slice(0, 16) %></div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+                <span class="chip chip-violet"><%= selected.category %></span>
+                <span class="chip <%= selected.sent ? 'chip-green' : 'chip-amber' %>"><%= selected.sent ? 'delivered via SMTP' : 'stored (no SMTP)' %></span>
+                <% if (selected.error) { %><span class="chip chip-red"><%= selected.error %></span><% } %>
+              </div>
+            </div>
+            <div class="mail-preview">
+              <iframe srcdoc="<%= selected.html %>" title="Email preview"></iframe>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

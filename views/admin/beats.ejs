@@ -1,0 +1,148 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+<div class="wrap shell">
+  <%- include('../partials/dash-nav') %>
+  <div>
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Catalogue</div>
+        <h1>Beats</h1>
+        <p>Upload audio + cover art, set the price, BPM and key. Unpublished beats are hidden from the store.</p>
+      </div>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <div class="panel" style="margin-bottom:24px">
+      <div class="panel-head">
+        <h2>Upload a new beat</h2>
+        <span class="muted" style="font-size:.8rem">MP3/WAV ≤ 40 MB · cover ≤ 8 MB</span>
+      </div>
+      <div class="panel-body">
+        <form method="post" action="/admin/beats" enctype="multipart/form-data">
+          <div class="form-grid">
+            <div class="field">
+              <label for="title">Beat title *</label>
+              <input class="input" id="title" name="title" required placeholder="Midnight Accra">
+            </div>
+            <div class="field">
+              <label for="genre">Genre</label>
+              <input class="input" id="genre" name="genre" list="genres" placeholder="Afrobeats">
+              <datalist id="genres">
+                <option>Afrobeats</option><option>Trap</option><option>R&amp;B</option><option>Drill</option>
+                <option>Amapiano</option><option>Highlife</option><option>Alté</option><option>Hip-hop</option>
+              </datalist>
+            </div>
+            <div class="field">
+              <label for="bpm">BPM</label>
+              <input class="input" id="bpm" name="bpm" type="number" min="40" max="240" placeholder="102">
+            </div>
+            <div class="field">
+              <label for="musical_key">Key</label>
+              <input class="input" id="musical_key" name="musical_key" placeholder="F# minor">
+            </div>
+            <div class="field">
+              <label for="price">Price (GHS) *</label>
+              <input class="input" id="price" name="price" type="number" min="0" step="0.01" required placeholder="45.00">
+              <div class="hint">This is the lease price. Premium (×2) and exclusive (×6) are calculated automatically.</div>
+            </div>
+            <div class="field">
+              <label for="cover">Cover art</label>
+              <input class="input" id="cover" name="cover" type="file" accept="image/*">
+              <div class="hint file-name">Square image works best (1000×1000).</div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="audio">Audio file</label>
+            <input class="input" id="audio" name="audio" type="file" accept="audio/*">
+            <div class="hint file-name">This is what buyers stream and download — upload the untagged master.</div>
+          </div>
+          <div class="field">
+            <label for="description">Description</label>
+            <textarea class="textarea" id="description" name="description" placeholder="Mood, references, what type of artist it suits…"></textarea>
+          </div>
+          <label class="radio-card" style="margin-bottom:16px">
+            <input type="checkbox" name="is_published" checked>
+            <div><div class="rc-title">Publish immediately</div><div class="rc-sub">Visible in the public beat store</div></div>
+          </label>
+          <button class="btn btn-primary" type="submit">Upload beat</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Catalogue · <%= beats.length %> beats</h2></div>
+      <% if (!beats.length) { %>
+        <div class="empty"><p>No beats yet — upload your first one above.</p></div>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Beat</th><th>Details</th><th>Price</th><th>Sales</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <% beats.forEach(function (beat, i) { %>
+                <tr>
+                  <td>
+                    <div style="display:flex;gap:11px;align-items:center">
+                      <% if (beat.cover_image) { %>
+                        <img src="<%= beat.cover_image %>" alt="" style="width:44px;height:44px;border-radius:9px;object-fit:cover">
+                      <% } else { %>
+                        <div style="width:44px;height:44px;border-radius:9px;background:var(--grad-soft);display:grid;place-items:center;font-size:.78rem;font-weight:700"><%= beat.title.slice(0,2).toUpperCase() %></div>
+                      <% } %>
+                      <div>
+                        <div class="t-title"><%= beat.title %></div>
+                        <div class="t-sub"><%= beat.audio_file ? '♪ audio ready' : 'no audio' %> · <%= beat.cover_image ? 'cover ✓' : 'no cover' %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="t-sub"><%= [beat.genre, beat.bpm ? beat.bpm + ' BPM' : null, beat.musical_key].filter(Boolean).join(' · ') || '—' %></td>
+                  <td style="font-weight:600;white-space:nowrap"><%= money(beat.price_cents) %></td>
+                  <td><%= beat.sales %></td>
+                  <td><span class="badge <%= beat.is_published ? 'paid' : 'pending' %>"><%= beat.is_published ? 'live' : 'draft' %></span></td>
+                  <td>
+                    <div class="table-actions">
+                      <button class="btn btn-ghost btn-sm" type="button" onclick="document.getElementById('edit-<%= beat.id %>').showModal()">Edit</button>
+                      <form method="post" action="/admin/beats/<%= beat.id %>/delete" onsubmit="return confirm('Delete “<%= beat.title.replace(/'/g, "\\'") %>”? This also removes its orders.')">
+                        <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                      </form>
+                    </div>
+
+                    <dialog id="edit-<%= beat.id %>" style="border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--text);max-width:560px;width:92vw;padding:0">
+                      <form method="post" action="/admin/beats/<%= beat.id %>/update" enctype="multipart/form-data" style="padding:24px">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+                          <h3 style="margin:0">Edit “<%= beat.title %>”</h3>
+                          <button type="button" class="x" style="background:none;border:0;color:var(--muted);cursor:pointer;font-size:1.1rem" onclick="document.getElementById('edit-<%= beat.id %>').close()">✕</button>
+                        </div>
+                        <div class="row row-2">
+                          <div class="field"><label>Title</label><input class="input" name="title" value="<%= beat.title %>"></div>
+                          <div class="field"><label>Genre</label><input class="input" name="genre" value="<%= beat.genre || '' %>"></div>
+                          <div class="field"><label>BPM</label><input class="input" name="bpm" type="number" value="<%= beat.bpm || '' %>"></div>
+                          <div class="field"><label>Key</label><input class="input" name="musical_key" value="<%= beat.musical_key || '' %>"></div>
+                        </div>
+                        <div class="field"><label>Price (GHS, lease)</label><input class="input" name="price" type="number" step="0.01" value="<%= (beat.price_cents / 100).toFixed(2) %>"></div>
+                        <div class="field"><label>Description</label><textarea class="textarea" name="description"><%= beat.description || '' %></textarea></div>
+                        <div class="field"><label>Replace cover</label><input class="input" name="cover" type="file" accept="image/*"><div class="hint file-name">Leave empty to keep current art</div></div>
+                        <div class="field"><label>Replace audio</label><input class="input" name="audio" type="file" accept="audio/*"><div class="hint file-name">Leave empty to keep current audio</div></div>
+                        <label class="radio-card" style="margin-bottom:16px">
+                          <input type="checkbox" name="is_published" <%= beat.is_published ? 'checked' : '' %>>
+                          <div><div class="rc-title">Published</div><div class="rc-sub">Visible in the store</div></div>
+                        </label>
+                        <div style="display:flex;gap:10px">
+                          <button class="btn btn-primary" type="submit">Save changes</button>
+                          <a class="btn btn-ghost" href="/beats/<%= beat.id %>" target="_blank">Preview</a>
+                        </div>
+                      </form>
+                    </dialog>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

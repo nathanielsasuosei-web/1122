@@ -1,0 +1,23 @@
+<aside class="side">
+  <div class="side-label"><%= isAdmin ? 'Producer' : 'Artist' %></div>
+  <% if (isAdmin) { %>
+    <a href="/admin" class="<%= path === '/admin' ? 'active' : '' %>">◈ Overview</a>
+    <a href="/admin/beats" class="<%= path === '/admin/beats' ? 'active' : '' %>">♪ Beats</a>
+    <a href="/admin/videos" class="<%= path === '/admin/videos' ? 'active' : '' %>">▷ Videos</a>
+    <a href="/admin/orders" class="<%= path === '/admin/orders' ? 'active' : '' %>">₵ Orders</a>
+    <a href="/admin/messages" class="<%= path === '/admin/messages' ? 'active' : '' %>">✉ Messages
+      <% if (typeof unreadCount !== 'undefined' && unreadCount) { %><span class="count"><%= unreadCount %></span><% } %>
+    </a>
+    <a href="/admin/mailbox" class="<%= path === '/admin/mailbox' ? 'active' : '' %>">◫ Mailbox</a>
+    <a href="/admin/settings" class="<%= path === '/admin/settings' ? 'active' : '' %>">⚙ Settings</a>
+    <div class="side-label">Public</div>
+    <a href="/beats">↗ Beat store</a>
+  <% } else { %>
+    <a href="/dashboard" class="<%= path === '/dashboard' ? 'active' : '' %>">◈ My orders</a>
+    <a href="/dashboard/messages" class="<%= path === '/dashboard/messages' ? 'active' : '' %>">✉ Messages
+      <% if (typeof unreadCount !== 'undefined' && unreadCount) { %><span class="count"><%= unreadCount %></span><% } %>
+    </a>
+    <a href="/beats">♪ Browse beats</a>
+    <a href="/videos">▷ Videos</a>
+  <% } %>
+</aside>

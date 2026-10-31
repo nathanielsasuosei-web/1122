@@ -1,0 +1,34 @@
+{
+  "name": "bassline-studio",
+  "version": "1.0.0",
+  "description": "Music producer storefront: beat licences, Mobile Money + bank payments, email delivery, artist accounts and producer admin.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node scripts/seed.js",
+    "demo-audio": "node scripts/make-demo-audio.js",
+    "test": "node scripts/e2e.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nathanielsasuosei-web/1122.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nathanielsasuosei-web/1122/issues"
+  },
+  "homepage": "https://github.com/nathanielsasuosei-web/1122#readme",
+  "dependencies": {
+    "ejs": "^7.0.2",
+    "express": "^5.3.0",
+    "express-session": "^1.19.0",
+    "multer": "^2.5.0",
+    "nodemailer": "^10.3.1"
+  },
+  "engines": {
+    "node": ">=22.5"
+  }
+}

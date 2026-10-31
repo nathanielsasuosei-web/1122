@@ -1,0 +1,92 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+<div class="wrap shell">
+  <%- include('../partials/dash-nav') %>
+  <div>
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Visuals</div>
+        <h1>Videos</h1>
+        <p>Upload a video file, or paste a YouTube / Vimeo link to embed it on the video wall.</p>
+      </div>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <div class="panel" style="margin-bottom:24px">
+      <div class="panel-head"><h2>Add a video</h2><span class="muted" style="font-size:.8rem">MP4/WebM ≤ 120 MB</span></div>
+      <div class="panel-body">
+        <form method="post" action="/admin/videos" enctype="multipart/form-data">
+          <div class="form-grid">
+            <div class="field">
+              <label for="title">Title *</label>
+              <input class="input" id="title" name="title" required placeholder="Cook-up: Neon Highway">
+            </div>
+            <div class="field">
+              <label for="video">Video file</label>
+              <input class="input" id="video" name="video" type="file" accept="video/*">
+              <div class="hint file-name">Upload an MP4, or use the embed link below</div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="embed_url">…or embed link</label>
+            <input class="input" id="embed_url" name="embed_url" placeholder="https://www.youtube.com/embed/VIDEO_ID">
+            <div class="hint">Use the /embed/ YouTube URL (not youtu.be) so it plays inside the page.</div>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="thumb">Thumbnail (optional)</label>
+              <input class="input" id="thumb" name="thumb" type="file" accept="image/*">
+              <div class="hint file-name">Shown before an embed plays</div>
+            </div>
+            <div class="field">
+              <label for="description">Description</label>
+              <input class="input" id="description" name="description" placeholder="A short line about the video">
+            </div>
+          </div>
+          <label class="radio-card" style="margin-bottom:16px">
+            <input type="checkbox" name="is_published" checked>
+            <div><div class="rc-title">Publish immediately</div><div class="rc-sub">Visible on the public video wall</div></div>
+          </label>
+          <button class="btn btn-primary" type="submit">Add video</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Video wall · <%= videos.length %></h2><a href="/videos" class="btn btn-ghost btn-sm" target="_blank">View public page</a></div>
+      <% if (!videos.length) { %>
+        <div class="empty"><p>No videos yet.</p></div>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Video</th><th>Type</th><th>Status</th><th>Added</th><th>Actions</th></tr></thead>
+            <tbody>
+              <% videos.forEach(function (v) { %>
+                <tr>
+                  <td>
+                    <div class="t-title"><%= v.title %></div>
+                    <div class="t-sub"><%= v.description || '—' %></div>
+                  </td>
+                  <td><span class="chip chip-cyan"><%= v.kind %></span></td>
+                  <td><span class="badge <%= v.is_published ? 'paid' : 'pending' %>"><%= v.is_published ? 'live' : 'hidden' %></span></td>
+                  <td class="t-sub"><%= (v.created_at || '').slice(0, 10) %></td>
+                  <td>
+                    <div class="table-actions">
+                      <form method="post" action="/admin/videos/<%= v.id %>/toggle"><button class="btn btn-ghost btn-sm" type="submit"><%= v.is_published ? 'Hide' : 'Publish' %></button></form>
+                      <form method="post" action="/admin/videos/<%= v.id %>/delete" onsubmit="return confirm('Delete this video?')"><button class="btn btn-danger btn-sm" type="submit">Delete</button></form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

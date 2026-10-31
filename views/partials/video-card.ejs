@@ -1,0 +1,25 @@
+<article class="video-card">
+  <% if (video.kind === 'embed' && video.embed_url) { %>
+    <% const embedSrc = video.embed_url; %>
+    <% if (video.thumb_image) { %>
+      <div class="video-thumb" data-embed="<%= embedSrc %>">
+        <img src="<%= video.thumb_image %>" alt="<%= video.title %>" loading="lazy">
+        <div class="play-overlay"><div class="ring"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div></div>
+      </div>
+    <% } else { %>
+      <div class="video-frame"><iframe src="<%= embedSrc %>" title="<%= video.title %>" allowfullscreen loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture"></iframe></div>
+    <% } %>
+  <% } else if (video.video_file) { %>
+    <div class="video-frame">
+      <video controls preload="metadata" <% if (video.thumb_image) { %>poster="<%= video.thumb_image %>"<% } %>>
+        <source src="<%= video.video_file %>">
+      </video>
+    </div>
+  <% } else { %>
+    <div class="video-frame" style="display:grid;place-items:center;color:var(--muted-2)">No video file</div>
+  <% } %>
+  <div class="video-meta">
+    <h3 style="margin:0 0 4px;font-size:1rem"><%= video.title %></h3>
+    <% if (video.description) { %><p style="margin:0;font-size:.85rem"><%= video.description %></p><% } %>
+  </div>
+</article>

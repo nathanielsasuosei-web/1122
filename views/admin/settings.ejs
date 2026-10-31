@@ -1,0 +1,112 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+<div class="wrap shell">
+  <%- include('../partials/dash-nav') %>
+  <div>
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Studio setup</div>
+        <h1>Settings</h1>
+        <p>Email delivery, payment methods and the studio profile.</p>
+      </div>
+      <span class="badge <%= paymentsMode === 'demo' ? 'pending' : 'paid' %>">Payments: <%= paymentsMode %></span>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <div class="panel" style="margin-bottom:22px">
+      <div class="panel-head">
+        <h2>Email delivery (SMTP)</h2>
+        <span class="badge <%= smtpOn ? 'paid' : 'pending' %>"><%= smtpOn ? 'configured' : 'not configured' %></span>
+      </div>
+      <div class="panel-body">
+        <p style="font-size:.9rem">
+          Without SMTP, every email is still generated and saved in the <a href="/admin/mailbox" style="color:var(--cyan)">Mailbox</a> so you can test the full flow.
+          Add credentials here (or in your <span class="mono">.env</span>) to send for real.
+        </p>
+        <form method="post" action="/admin/settings/smtp">
+          <div class="form-grid">
+            <div class="field">
+              <label for="host">SMTP host</label>
+              <input class="input" id="host" name="host" value="<%= smtp.host %>" placeholder="smtp.gmail.com">
+            </div>
+            <div class="field">
+              <label for="port">Port</label>
+              <input class="input" id="port" name="port" value="<%= smtp.port %>" placeholder="587">
+            </div>
+            <div class="field">
+              <label for="user">Username</label>
+              <input class="input" id="user" name="user" value="<%= smtp.user %>" placeholder="you@gmail.com">
+            </div>
+            <div class="field">
+              <label for="pass">Password / app password</label>
+              <input class="input" id="pass" name="pass" type="password" value="<%= smtp.pass %>" placeholder="••••••••">
+            </div>
+            <div class="field">
+              <label for="from">From address</label>
+              <input class="input" id="from" name="from" value="<%= smtp.from %>" placeholder="Bassline Studio &lt;studio@gmail.com&gt;">
+            </div>
+            <div class="field">
+              <label>Encryption</label>
+              <label class="radio-card" style="padding:12px 14px">
+                <input type="checkbox" name="secure" <%= String(smtp.secure) === 'true' ? 'checked' : '' %>>
+                <div><div class="rc-title">Use TLS (port 465)</div><div class="rc-sub">Leave off for STARTTLS on 587</div></div>
+              </label>
+            </div>
+          </div>
+          <button class="btn btn-primary" type="submit">Save SMTP settings</button>
+        </form>
+        <p class="hint" style="margin-top:12px">Gmail needs an App Password (2‑step verification on). Zoho, Mailgun, Resend and SendGrid SMTP all work.</p>
+      </div>
+    </div>
+
+    <div class="split-2">
+      <div class="panel">
+        <div class="panel-head"><h2>Payment methods</h2></div>
+        <div class="panel-body">
+          <div class="summary-row"><span>Mode</span><span><span class="badge <%= paymentsMode === 'demo' ? 'pending' : 'paid' %>"><%= paymentsMode %></span></span></div>
+          <div class="summary-row"><span>Auto-confirm delay</span><span><%= Math.round(delay / 1000) %>s (demo)</span></div>
+          <div class="divider"></div>
+          <div class="label-sm">Mobile Money</div>
+          <ul class="list-plain" style="margin-bottom:14px">
+            <% Object.values(providers).forEach(function (p) { %><li><%= p.label %></li><% }) %>
+          </ul>
+          <div class="label-sm">Bank transfer</div>
+          <div class="bank-box">
+            <dl>
+              <dt>Bank</dt><dd><%= bank.bank %></dd>
+              <dt>Account name</dt><dd><%= bank.account_name %></dd>
+              <dt>Number</dt><dd class="mono"><%= bank.account_number %></dd>
+              <dt>Branch</dt><dd><%= bank.branch %></dd>
+            </dl>
+          </div>
+          <p class="hint" style="margin-top:12px">These come from env vars (<span class="mono">BANK_*</span>). To go live, set <span class="mono">PAYMENTS_MODE=live</span> and wire your PSP in <span class="mono">lib/payments.js</span>.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Studio profile</h2></div>
+        <div class="panel-body">
+          <form method="post" action="/admin/settings/profile">
+            <div class="field">
+              <label for="name">Producer name</label>
+              <input class="input" id="name" name="name" value="<%= currentUser.name %>">
+            </div>
+            <div class="field">
+              <label for="email">Email (receives sale + message alerts)</label>
+              <input class="input" id="email" name="email" type="email" value="<%= currentUser.email %>">
+            </div>
+            <button class="btn btn-primary" type="submit">Save profile</button>
+          </form>
+          <div class="divider"></div>
+          <div class="label-sm">Environment</div>
+          <p class="hint" style="margin:0">Studio name, tagline and bank details are set with env vars in <span class="mono">.env</span>. See <span class="mono">README.md</span>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

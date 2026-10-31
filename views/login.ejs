@@ -1,0 +1,38 @@
+<%- include('partials/head', { title }) %>
+<%- include('partials/nav') %>
+<div class="wrap auth-page">
+  <div class="center-narrow">
+    <div style="text-align:center;margin-bottom:26px">
+      <div class="eyebrow" style="justify-content:center">Welcome back</div>
+      <h1 style="font-size:clamp(1.8rem,4vw,2.5rem)">Log in</h1>
+      <p>Artists and the producer sign in here.</p>
+    </div>
+    <%- include('partials/flash') %>
+    <div class="panel panel-pad">
+      <form method="post" action="/login">
+        <input type="hidden" name="next" value="<%= next %>">
+        <div class="field">
+          <label for="email">Email</label>
+          <input class="input" id="email" name="email" type="email" required autocomplete="email" autofocus placeholder="you@studio.com">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input class="input" id="password" name="password" type="password" required autocomplete="current-password" placeholder="Your password">
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Log in</button>
+      </form>
+      <div class="divider"></div>
+      <p style="text-align:center;margin:0;font-size:.88rem">New here? <a href="/register" style="color:var(--pink);font-weight:600">Create an artist account</a></p>
+    </div>
+    <% if (demoMode) { %>
+      <div class="notice" style="margin-top:20px">
+        <span>🎛</span>
+        <div><strong>Producer demo login</strong><br>Email <span class="mono">admin@bassline.studio</span> · password <span class="mono">producer123</span> (change in your .env)</div>
+      </div>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/footer') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

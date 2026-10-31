@@ -1,0 +1,84 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+<div class="wrap shell">
+  <%- include('../partials/dash-nav') %>
+  <div>
+    <p style="font-size:.82rem;margin-bottom:16px"><a href="/dashboard" class="muted">← All orders</a></p>
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Order <%= order.reference %></div>
+        <h1><%= order.title %></h1>
+        <p><%= licenses[order.license] ? licenses[order.license].label : order.license %> · placed <%= (order.created_at || '').slice(0, 16) %></p>
+      </div>
+      <span class="badge <%= order.status %>" style="font-size:.8rem;padding:8px 16px"><%= order.status %></span>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <% if (order.status === 'pending') { %>
+      <div class="panel panel-pad" data-pending-order="<%= order.reference %>" style="margin-bottom:22px">
+        <div style="display:flex;gap:16px;align-items:start">
+          <div style="width:38px;height:38px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--pink);animation:spin 1s linear infinite;flex:none"></div>
+          <div>
+            <h3 style="margin-bottom:6px">Waiting for payment to confirm…</h3>
+            <p style="margin:0;font-size:.9rem">
+              <% if (demoMode) { %>Demo mode is confirming your payment automatically. This page refreshes itself the moment it clears.
+              <% } else { %>We're waiting for your <%= order.method === 'bank' ? 'bank transfer' : 'Mobile Money payment' %> to clear. This page updates automatically.
+              <% } %>
+            </p>
+            <% if (order.method === 'bank') { %>
+              <form method="post" action="/orders/<%= order.reference %>/proof" style="margin-top:14px">
+                <button class="btn btn-ghost btn-sm" type="submit">I've sent the transfer</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="split-2">
+      <div class="panel">
+        <div class="panel-head"><h2>Beat</h2></div>
+        <div class="panel-body">
+          <div style="display:flex;gap:16px;align-items:center">
+            <% if (order.cover_image) { %>
+              <img src="<%= order.cover_image %>" alt="" style="width:84px;height:84px;border-radius:14px;object-fit:cover">
+            <% } else { %>
+              <div style="width:84px;height:84px;border-radius:14px;background:var(--grad);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.3rem"><%= order.title.slice(0,2).toUpperCase() %></div>
+            <% } %>
+            <div>
+              <h3 style="margin-bottom:4px"><%= order.title %></h3>
+              <div class="beat-meta"><span><%= order.genre || '—' %></span><span>·</span><span><%= order.bpm || '—' %> BPM</span><span>·</span><span><%= order.musical_key || '—' %></span></div>
+            </div>
+          </div>
+          <% if (order.status === 'paid') { %>
+            <a class="btn btn-primary btn-block" style="margin-top:20px" href="/download/<%= order.download_token %>">⬇ Download <%= licenses[order.license] ? licenses[order.license].label : 'your files' %></a>
+            <p class="hint" style="text-align:center;margin-top:10px">Downloaded <%= order.download_count %> time<%= order.download_count === 1 ? '' : 's' %> · the link was also emailed to you</p>
+          <% } else { %>
+            <button class="btn btn-block" style="margin-top:20px" disabled>⬇ Download locked — awaiting payment</button>
+          <% } %>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Payment</h2></div>
+        <div class="panel-body">
+          <div class="summary-row"><span>Order reference</span><span class="mono"><%= order.reference %></span></div>
+          <div class="summary-row"><span>Amount</span><span style="color:#fff"><%= money(order.amount_cents) %></span></div>
+          <div class="summary-row"><span>Method</span><span><%= order.method === 'bank' ? 'Bank transfer' : 'Mobile Money' %></span></div>
+          <% if (order.method === 'momo') { %>
+            <div class="summary-row"><span>Number</span><span class="mono"><%= order.account_number || '—' %></span></div>
+          <% } %>
+          <div class="summary-row"><span>Status</span><span><span class="badge <%= order.status %>"><%= order.status %></span></span></div>
+          <div class="summary-row"><span>Paid</span><span><%= order.paid_at ? order.paid_at.slice(0, 16) : '—' %></span></div>
+          <p class="hint" style="margin-top:14px">A receipt and your download link were emailed to <strong><%= currentUser.email %></strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<%- include('../partials/player') %>
+<script src="/js/app.js"></script>
+</body>
+</html>
