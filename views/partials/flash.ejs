@@ -1,0 +1,6 @@
+<% if (flash) { %>
+  <div class="flash <%= flash.type %>" id="flash">
+    <span><%= flash.message %></span>
+    <button class="x" onclick="this.parentElement.remove()" aria-label="Dismiss">✕</button>
+  </div>
+<% } %>

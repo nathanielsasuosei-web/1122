@@ -1,0 +1,39 @@
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div style="max-width:340px">
+      <a href="/" class="logo" style="margin-bottom:12px">
+        <span class="logo-mark"><span></span><span></span><span></span></span>
+        <span><%= studio.name %><small><%= studio.producer %> · beat store</small></span>
+      </a>
+      <p style="font-size:.86rem"><%= studio.tagline %></p>
+      <p style="font-size:.8rem" class="muted">Mobile Money · Bank transfer · Instant email delivery</p>
+    </div>
+    <div>
+      <div class="label-sm">Store</div>
+      <div class="footer-links" style="flex-direction:column;gap:8px;display:grid">
+        <a href="/beats">All beats</a>
+        <a href="/videos">Videos</a>
+        <a href="/about">About the producer</a>
+      </div>
+    </div>
+    <div>
+      <div class="label-sm">Artists</div>
+      <div class="footer-links" style="flex-direction:column;gap:8px;display:grid">
+        <a href="/register">Create account</a>
+        <a href="/login">Log in</a>
+        <a href="/dashboard/messages">Contact producer</a>
+      </div>
+    </div>
+    <div>
+      <div class="label-sm">Studio</div>
+      <div class="footer-links" style="flex-direction:column;gap:8px;display:grid">
+        <a href="mailto:<%= studio.email %>">Email us</a>
+        <a href="/admin">Producer login</a>
+      </div>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:30px;padding-top:20px;border-top:1px solid var(--line-soft);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap">
+    <small class="muted">© <%= new Date().getFullYear() %> <%= studio.name %>. All beats produced by <%= studio.producer %>.</small>
+    <small class="muted">Built for artists. Accra, Ghana 🇬🇭</small>
+  </div>
+</footer>

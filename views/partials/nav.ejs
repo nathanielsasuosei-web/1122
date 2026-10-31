@@ -1,0 +1,32 @@
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="/" class="logo">
+      <span class="logo-mark"><span></span><span></span><span></span></span>
+      <span><%= studio.name %><small><%= studio.producer %> · beat store</small></span>
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="/beats" class="<%= path.startsWith('/beats') ? 'active' : '' %>">Beats</a>
+      <a href="/videos" class="<%= path === '/videos' ? 'active' : '' %>">Videos</a>
+      <a href="/about" class="<%= path === '/about' ? 'active' : '' %>">About</a>
+      <% if (currentUser) { %>
+        <% if (isAdmin) { %>
+          <a href="/admin" class="<%= path.startsWith('/admin') ? 'active' : '' %>">Producer area</a>
+        <% } else { %>
+          <a href="/dashboard" class="<%= path.startsWith('/dashboard') ? 'active' : '' %>">Dashboard</a>
+        <% } %>
+      <% } %>
+    </nav>
+    <div class="nav-cta">
+      <% if (currentUser) { %>
+        <a href="<%= isAdmin ? '/admin' : '/dashboard' %>" class="avatar hide-sm" title="<%= currentUser.name %>"><%= currentUser.name.slice(0,2).toUpperCase() %></a>
+        <form action="/logout" method="post" style="margin:0">
+          <button class="btn btn-ghost btn-sm" type="submit">Log out</button>
+        </form>
+      <% } else { %>
+        <a href="/login" class="btn btn-ghost btn-sm hide-sm">Log in</a>
+        <a href="/register" class="btn btn-primary btn-sm">Create account</a>
+      <% } %>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</header>

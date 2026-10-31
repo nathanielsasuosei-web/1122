@@ -1,0 +1,80 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+<div class="wrap shell">
+  <%- include('../partials/dash-nav', { unreadCount: unread }) %>
+  <div>
+    <div class="dash-hero">
+      <div class="eyebrow">Artist dashboard</div>
+      <h1>Welcome back, <%= currentUser.name.split(' ')[0] %></h1>
+      <p>Your licences, downloads and messages with the studio — all in one place.</p>
+      <div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:20px">
+        <div><div style="font-family:var(--display);font-size:1.4rem;font-weight:700"><%= orders.length %></div><small class="muted">Total orders</small></div>
+        <div><div style="font-family:var(--display);font-size:1.4rem;font-weight:700"><%= money(spent) %></div><small class="muted">Licences purchased</small></div>
+        <div><div style="font-family:var(--display);font-size:1.4rem;font-weight:700"><%= orders.filter(o => o.status === 'paid').length %></div><small class="muted">Ready to download</small></div>
+      </div>
+    </div>
+
+    <%- include('../partials/flash') %>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>My orders</h2>
+        <a href="/beats" class="btn btn-primary btn-sm">Buy another beat</a>
+      </div>
+      <% if (!orders.length) { %>
+        <div class="empty">
+          <h3>No orders yet</h3>
+          <p>Once you buy a licence it shows up here with your download link.</p>
+          <a href="/beats" class="btn btn-ghost btn-sm">Browse the store</a>
+        </div>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Beat</th><th>Licence</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr>
+            </thead>
+            <tbody>
+              <% orders.forEach(function (o) { %>
+                <tr>
+                  <td>
+                    <div style="display:flex;gap:11px;align-items:center">
+                      <% if (o.cover_image) { %>
+                        <img src="<%= o.cover_image %>" alt="" style="width:40px;height:40px;border-radius:9px;object-fit:cover">
+                      <% } else { %>
+                        <div style="width:40px;height:40px;border-radius:9px;background:var(--grad-soft);display:grid;place-items:center;font-size:.8rem;font-weight:700"><%= o.title.slice(0,2).toUpperCase() %></div>
+                      <% } %>
+                      <div>
+                        <div class="t-title"><%= o.title %></div>
+                        <div class="t-sub"><%= o.reference %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="t-sub"><%= licenses[o.license] ? licenses[o.license].label : o.license %></span></td>
+                  <td style="font-weight:600;white-space:nowrap"><%= money(o.amount_cents) %></td>
+                  <td><span class="badge <%= o.status %>"><%= o.status %></span></td>
+                  <td class="t-sub"><%= (o.created_at || '').slice(0, 10) %></td>
+                  <td style="text-align:right">
+                    <a class="btn btn-ghost btn-sm" href="/dashboard/orders/<%= o.reference %>">View</a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="panel panel-pad" style="margin-top:22px;display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap">
+      <div>
+        <h3 style="margin-bottom:4px">Need a custom beat?</h3>
+        <p style="margin:0;font-size:.88rem">Message the producer — replies come to your email as well as here.</p>
+      </div>
+      <a href="/dashboard/messages" class="btn btn-primary">Open messages</a>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<%- include('../partials/player') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

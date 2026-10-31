@@ -1,0 +1,143 @@
+<%- include('partials/head', { title }) %>
+<%- include('partials/nav') %>
+<div class="wrap" style="padding:34px 0 40px">
+  <p style="font-size:.82rem;margin-bottom:20px"><a href="/beats/<%= beat.id %>" class="muted">← Back to the beat</a></p>
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Checkout</div>
+      <h1>Licence “<%= beat.title %>”</h1>
+      <p>Choose your licence, then pay by Mobile Money or bank transfer.</p>
+    </div>
+  </div>
+
+  <%- include('partials/flash') %>
+
+  <form method="post" action="/checkout/<%= beat.id %>" class="checkout-grid">
+    <div style="display:grid;gap:22px">
+      <!-- licence -->
+      <section class="panel">
+        <div class="panel-head"><h2>1 · Choose a licence</h2><span class="muted" style="font-size:.8rem" id="licensePrices"><%= licenses[license].label %></span></div>
+        <div class="panel-body">
+          <div class="license-list">
+            <% Object.entries(licenses).forEach(function ([key, lic]) { %>
+              <label class="radio-card">
+                <input type="radio" name="license" value="<%= key %>" data-price="<%= money(prices[key]) %>" data-label="<%= lic.label %>" <%= license === key ? 'checked' : '' %> required>
+                <div style="flex:1">
+                  <div class="rc-title"><span><%= lic.label %></span><span style="color:var(--pink)"><%= money(prices[key]) %></span></div>
+                  <div class="rc-sub"><%= lic.blurb %></div>
+                </div>
+              </label>
+            <% }) %>
+          </div>
+        </div>
+      </section>
+
+      <!-- payment -->
+      <section class="panel">
+        <div class="panel-head"><h2>2 · Pay</h2><span class="muted" style="font-size:.8rem">Ghana cedis (GHS)</span></div>
+        <div class="panel-body">
+          <div class="pay-method">
+            <label class="radio-card">
+              <input type="radio" name="method" value="momo" checked>
+              <div><div class="rc-title">Mobile Money</div><div class="rc-sub">MTN · Telecel · AirtelTigo</div></div>
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="method" value="bank">
+              <div><div class="rc-title">Bank transfer</div><div class="rc-sub"><%= bank.bank %></div></div>
+            </label>
+          </div>
+
+          <div id="momoFields">
+            <div class="field">
+              <label>Network</label>
+              <div class="network-grid">
+                <% Object.entries(providers).forEach(function ([key, p], i) { %>
+                  <label class="network">
+                    <input type="radio" name="provider" value="<%= key %>" <%= i === 0 ? 'checked' : '' %>>
+                    <strong><%= p.label.replace(' Mobile Money', '').replace(' Money', '') %></strong>
+                    <span><%= p.label %></span>
+                  </label>
+                <% }) %>
+              </div>
+            </div>
+            <div class="field">
+              <label for="account_number">Mobile Money number</label>
+              <input class="input" id="account_number" name="account_number" inputmode="numeric" pattern="0[0-9]{9}" maxlength="10" placeholder="0241234567">
+              <div class="hint">The number that will be charged — 10 digits, starting with 0.</div>
+            </div>
+            <div class="notice">
+              <span>📲</span>
+              <div>
+                <strong>How it works:</strong> you'll get a prompt on your phone to approve the payment.
+                <% if (demoMode) { %>In this demo the charge is approved automatically after a few seconds so you can test the full flow.<% } %>
+              </div>
+            </div>
+          </div>
+
+          <div id="bankFields" style="display:none">
+            <div class="bank-box">
+              <p style="margin:0 0 12px;font-weight:600;color:#fff">Transfer <%= money(prices[license]) %> to:</p>
+              <dl>
+                <dt>Bank</dt><dd><%= bank.bank %></dd>
+                <dt>Account name</dt><dd><%= bank.account_name %></dd>
+                <dt>Account number</dt><dd class="mono"><%= bank.account_number %></dd>
+                <dt>Branch</dt><dd><%= bank.branch %></dd>
+                <dt>SWIFT</dt><dd class="mono"><%= bank.swift %></dd>
+                <dt>Reference</dt><dd class="mono">Your email + beat title</dd>
+              </dl>
+            </div>
+            <p class="hint" style="margin-top:10px">Use your email address as the transfer reference. The producer confirms the transfer and your download email goes out immediately after.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- delivery -->
+      <section class="panel">
+        <div class="panel-head"><h2>3 · Delivery</h2></div>
+        <div class="panel-body">
+          <div class="bank-box" style="border-style:solid">
+            <div style="display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:600;color:#fff"><%= currentUser.name %></div>
+                <div class="muted" style="font-size:.84rem"><%= currentUser.email %></div>
+              </div>
+              <span class="chip chip-green">✓ Email delivery</span>
+            </div>
+            <p style="margin:14px 0 0;font-size:.84rem">Your download link and receipt are emailed here as soon as payment clears. Wrong address? <a href="/dashboard" style="color:var(--pink)">Manage account</a>.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="panel summary panel-pad">
+      <h3>Order summary</h3>
+      <div style="display:flex;gap:14px;align-items:center;margin:14px 0 18px">
+        <% if (beat.cover_image) { %>
+          <img src="<%= beat.cover_image %>" alt="" style="width:64px;height:64px;border-radius:12px;object-fit:cover">
+        <% } else { %>
+          <div style="width:64px;height:64px;border-radius:12px;background:var(--grad);display:grid;place-items:center;font-family:var(--display);font-weight:700"><%= beat.title.slice(0,2).toUpperCase() %></div>
+        <% } %>
+        <div>
+          <div style="font-weight:600"><%= beat.title %></div>
+          <div class="muted" style="font-size:.8rem"><%= [beat.genre, beat.bpm ? beat.bpm + ' BPM' : null, beat.musical_key].filter(Boolean).join(' · ') %></div>
+        </div>
+      </div>
+      <div class="summary-row"><span>Subtotal</span><span data-total><%= money(prices[license]) %></span></div>
+      <div class="summary-row"><span>Processing</span><span>Included</span></div>
+      <div class="summary-row total"><span>Total</span><span data-total><%= money(prices[license]) %></span></div>
+      <button class="btn btn-primary btn-block" type="submit" style="margin-top:16px">Place order →</button>
+      <p class="hint" style="text-align:center;margin-top:12px">
+        <%= demoMode ? 'Demo mode: payment confirms automatically after ~' + Math.round(demoDelay / 1000) + 's.' : 'You will be redirected to the payment provider.' %>
+      </p>
+      <ul class="list-plain" style="margin-top:18px">
+        <li>Untagged files</li>
+        <li>Instant email delivery</li>
+        <li>Secure checkout</li>
+      </ul>
+    </aside>
+  </form>
+</div>
+<%- include('partials/footer') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

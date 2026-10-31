@@ -1,0 +1,40 @@
+<article class="beat-card">
+  <div class="beat-cover">
+    <% if (beat.cover_image) { %>
+      <img src="<%= beat.cover_image %>" alt="<%= beat.title %> cover art" loading="lazy">
+    <% } else { %>
+      <div class="fallback"><%= beat.title.slice(0, 2).toUpperCase() %></div>
+    <% } %>
+    <div class="cover-tags">
+      <% if (beat.genre) { %><span class="chip chip-violet"><%= beat.genre %></span><% } %>
+      <span class="chip"><%= beat.bpm ? beat.bpm + ' BPM' : '— BPM' %></span><% if (beat.musical_key) { %><span class="chip chip-cyan"><%= beat.musical_key %></span><% } %>
+    </div>
+  </div>
+  <div class="beat-body">
+    <div class="beat-title">
+      <h3><a href="/beats/<%= beat.id %>"><%= beat.title %></a></h3>
+      <span class="beat-price"><%= money(beat.price_cents) %></span>
+    </div>
+    <div class="beat-meta">
+      <span><%= beat.genre || 'Open genre' %></span>
+      <span>·</span>
+      <span>Lease / premium / exclusive</span>
+    </div>
+    <div class="beat-actions">
+      <button
+        class="play-btn"
+        data-play="<%= beat.id %>"
+        data-src="<%= beat.audio_file || '' %>"
+        data-title="<%= beat.title %>"
+        data-meta="<%= [beat.genre, beat.bpm ? beat.bpm + ' BPM' : null, beat.musical_key].filter(Boolean).join(' · ') %>"
+        data-cover="<%= beat.cover_image || '' %>"
+        data-href="/checkout/<%= beat.id %>"
+        aria-label="Play preview"
+        <%= beat.audio_file ? '' : 'disabled' %>
+      >
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <a class="btn btn-primary btn-sm" href="/checkout/<%= beat.id %>">Buy licence</a>
+    </div>
+  </div>
+</article>

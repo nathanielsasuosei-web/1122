@@ -1,0 +1,80 @@
+<%- include('../partials/head', { title }) %>
+<%- include('../partials/nav') %>
+<div class="wrap shell">
+  <%- include('../partials/dash-nav') %>
+  <div>
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Inbox</div>
+        <h1>Messages</h1>
+        <p>Every reply is emailed to the artist automatically.</p>
+      </div>
+    </div>
+    <%- include('../partials/flash') %>
+
+    <% if (!threads.length) { %>
+      <div class="panel empty">
+        <h3>No conversations yet</h3>
+        <p>When an artist messages you from their dashboard, the thread appears here.</p>
+      </div>
+    <% } else { %>
+      <div class="panel inbox" style="overflow:hidden">
+        <div class="inbox-list">
+          <% threads.forEach(function (t) { %>
+            <a class="inbox-item <%= activeUser && activeUser.id === t.id ? 'active' : '' %>" href="/admin/messages?u=<%= t.id %>">
+              <div class="ii-name">
+                <span><%= t.name %></span>
+                <% if (t.unread) { %><span class="badge info"><%= t.unread %></span><% } %>
+              </div>
+              <div class="ii-prev"><%= t.last_body %></div>
+            </a>
+          <% }) %>
+        </div>
+        <div class="chat">
+          <% if (activeUser) { %>
+            <div class="panel-head" style="border-bottom:1px solid var(--line-soft)">
+              <div>
+                <h2 style="font-size:.98rem"><%= activeUser.name %></h2>
+                <div class="muted" style="font-size:.78rem"><%= activeUser.email %></div>
+              </div>
+              <span class="chip chip-violet"><%= thread.length %> message<%= thread.length === 1 ? '' : 's' %></span>
+            </div>
+            <div class="chat-log">
+              <% thread.forEach(function (m) { %>
+                <div class="bubble <%= m.sender === 'producer' ? 'me' : 'them' %>">
+                  <div><%= m.body %></div>
+                  <div class="meta"><%= m.sender === 'producer' ? 'You' : activeUser.name %> · <%= (m.created_at || '').slice(0, 16) %></div>
+                </div>
+              <% }) %>
+            </div>
+            <form class="chat-form" method="post" action="/admin/messages">
+              <input type="hidden" name="user_id" value="<%= activeUser.id %>">
+              <input class="input" name="body" placeholder="Reply to <%= activeUser.name.split(' ')[0] %>…" required maxlength="4000" autocomplete="off">
+              <button class="btn btn-primary" type="submit">Send reply</button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    <% } %>
+
+    <div class="panel panel-pad" style="margin-top:20px">
+      <h3 style="margin-bottom:10px">Start a conversation</h3>
+      <p style="font-size:.88rem">No message from an artist yet? You can still reach any registered artist directly.</p>
+      <form method="post" action="/admin/messages" style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+        <div class="field" style="flex:1 1 220px;margin:0">
+          <label for="uid">Artist ID</label>
+          <input class="input" id="uid" name="user_id" type="number" min="1" placeholder="e.g. 2" required>
+        </div>
+        <div class="field" style="flex:3 1 260px;margin:0">
+          <label for="msg">Message</label>
+          <input class="input" id="msg" name="body" placeholder="Say hello…" required>
+        </div>
+        <button class="btn btn-ghost" type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+</div>
+<%- include('../partials/footer') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

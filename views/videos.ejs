@@ -1,0 +1,26 @@
+<%- include('partials/head', { title }) %>
+<%- include('partials/nav') %>
+<div class="wrap" style="padding:38px 0 30px">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Video wall</div>
+      <h1>Sessions &amp; visuals</h1>
+      <p>Cook-ups, beat breakdowns and the odd studio freestyle.</p>
+    </div>
+  </div>
+  <% if (!videos.length) { %>
+    <div class="panel empty">
+      <h3>No videos yet</h3>
+      <p>The producer hasn't posted any visuals. Check back soon.</p>
+    </div>
+  <% } else { %>
+    <div class="grid grid-2">
+      <% videos.forEach(function (video) { %><%- include('partials/video-card', { video }) %><% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('partials/footer') %>
+<%- include('partials/player') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

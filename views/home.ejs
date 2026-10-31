@@ -1,0 +1,124 @@
+<%- include('partials/head', { title }) %>
+<%- include('partials/nav') %>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow">Accra · Worldwide licences</div>
+      <h1>Beats that<br><span class="grad-text">move the room.</span></h1>
+      <p class="hero-lede">
+        <%= studio.producer %> produces afrobeats, trap and R&amp;B for artists who care about the low end.
+        Preview every beat, pay with Mobile Money or bank transfer, and the untagged file lands in your inbox
+        the second payment clears.
+      </p>
+      <div class="hero-actions">
+        <a href="/beats" class="btn btn-primary">Browse the beat store</a>
+        <a href="/register" class="btn btn-ghost">Create a free artist account</a>
+      </div>
+      <div class="hero-badges">
+        <div class="hero-badge"><strong><%= stats.beats %></strong><span>Beats online</span></div>
+        <div class="hero-badge"><strong><%= stats.artists %></strong><span>Artists</span></div>
+        <div class="hero-badge"><strong><%= stats.sales %></strong><span>Licences sold</span></div>
+        <div class="hero-badge"><strong>MoMo</strong><span>&amp; bank</span></div>
+      </div>
+    </div>
+
+    <div class="eq-stage">
+      <div class="eq-top">
+        <span class="live-dot"><i></i> Now in the lab</span>
+        <span><%= studio.producer %> · Studio A</span>
+      </div>
+      <div class="equalizer" data-bars="46" aria-hidden="true"></div>
+      <div class="now">
+        <div class="now-cover">🎛</div>
+        <div>
+          <div class="now-title"><%= beats[0] ? beats[0].title : 'Midnight Accra' %></div>
+          <div class="now-sub"><%= beats[0] ? [beats[0].genre, beats[0].bpm ? beats[0].bpm + ' BPM' : null, beats[0].musical_key].filter(Boolean).join(' · ') : 'Afrobeats · 102 BPM · F# minor' %></div>
+        </div>
+        <div class="wave"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Afrobeats</span><span>Trap</span><span>R&amp;B</span><span>Drill</span><span>Amapiano</span><span>Highlife</span><span>Alté</span>
+    <span>Afrobeats</span><span>Trap</span><span>R&amp;B</span><span>Drill</span><span>Amapiano</span><span>Highlife</span><span>Alté</span>
+  </div>
+</div>
+
+<% if (beats.length) { %>
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">Fresh from the studio</div>
+        <h2>Latest beats</h2>
+        <p>Every preview is the full arrangement — no tags hidden in the intro. Pick a licence and it's yours.</p>
+      </div>
+      <a href="/beats" class="btn btn-ghost">See all <%= stats.beats %> beats →</a>
+    </div>
+    <div class="grid grid-3">
+      <% beats.slice(0, 6).forEach(function (beat) { %>
+        <%- include('partials/beat-card', { beat }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="panel panel-pad" style="background:var(--grad-soft)">
+      <div class="split-2" style="align-items:center;gap:38px">
+        <div>
+          <div class="eyebrow">How buying works</div>
+          <h2>Pay in seconds.<br>Download in minutes.</h2>
+          <p>No back-and-forth. The studio's store handles the licence, the payment and the delivery automatically — and emails you a receipt plus your download link.</p>
+          <a href="/register" class="btn btn-primary" style="margin-top:8px">Start with a free account</a>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <h3>Create your artist account</h3>
+            <p>One form. Your purchases, downloads and messages live in one dashboard.</p>
+          </div>
+          <div class="step">
+            <h3>Pay by Mobile Money or bank</h3>
+            <p>MTN, Telecel, AirtelTigo, or a bank transfer to the studio account.</p>
+          </div>
+          <div class="step">
+            <h3>Get the beat by email</h3>
+            <p>The untagged file and your licence details arrive in your inbox automatically.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<% if (videos.length) { %>
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="eyebrow">In the booth</div>
+        <h2>Studio videos</h2>
+        <p>Cook-up sessions, beat breakdowns and studio diaries.</p>
+      </div>
+      <a href="/videos" class="btn btn-ghost">All videos →</a>
+    </div>
+    <div class="grid grid-3">
+      <% videos.slice(0, 3).forEach(function (video) { %>
+        <%- include('partials/video-card', { video }) %>
+      <% }) %>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<%- include('partials/footer') %>
+<%- include('partials/player') %>
+<script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<%- include('partials/head', { title }) %>
+<%- include('partials/nav') %>
+<div class="wrap" style="padding:38px 0 20px">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Beat store</div>
+      <h1>Find your next single</h1>
+      <p><%= beats.length %> beat<%= beats.length === 1 ? '' : 's' %> ready to licence. Preview, pick a licence, pay by Mobile Money or bank.</p>
+    </div>
+  </div>
+  <form class="panel panel-pad" method="get" action="/beats" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:26px">
+    <div class="field" style="flex:2 1 220px;margin:0">
+      <label for="q">Search</label>
+      <input class="input" id="q" name="q" value="<%= filters.q %>" placeholder="Title, key or genre…">
+    </div>
+    <div class="field" style="flex:1 1 160px;margin:0">
+      <label for="genre">Genre</label>
+      <select class="select" id="genre" name="genre">
+        <option value="all">All genres</option>
+        <% genres.forEach(function (g) { %>
+          <option value="<%= g %>" <%= filters.genre === g ? 'selected' : '' %>><%= g %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="field" style="flex:1 1 160px;margin:0">
+      <label for="sort">Sort</label>
+      <select class="select" id="sort" name="sort">
+        <option value="new" <%= filters.sort === 'new' ? 'selected' : '' %>>Newest</option>
+        <option value="low" <%= filters.sort === 'low' ? 'selected' : '' %>>Price: low → high</option>
+        <option value="high" <%= filters.sort === 'high' ? 'selected' : '' %>>Price: high → low</option>
+        <option value="bpm" <%= filters.sort === 'bpm' ? 'selected' : '' %>>Tempo</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" type="submit">Filter</button>
+    <a class="btn btn-ghost" href="/beats">Reset</a>
+  </form>
+
+  <% if (!beats.length) { %>
+    <div class="panel empty">
+      <h3>No beats match that</h3>
+      <p>Try a different genre or clear the filters.</p>
+      <a href="/beats" class="btn btn-ghost btn-sm">Clear filters</a>
+    </div>
+  <% } else { %>
+    <div class="grid grid-3">
+      <% beats.forEach(function (beat) { %>
+        <%- include('partials/beat-card', { beat }) %>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+<%- include('partials/footer') %>
+<%- include('partials/player') %>
+<script src="/js/app.js"></script>
+</body>
+</html>
