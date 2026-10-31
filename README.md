@@ -104,8 +104,14 @@ started with `npm run dev`), but environment variables always win.
 ## Project layout
 
 ```
-server.js              app bootstrap, sessions, view locals, error pages
+server.js              long-running entry point (listen, demo-payment recovery)
+app.js                 the Express app itself (shared with api/index.js)
+api/index.js           serverless (Vercel) entry point
+Dockerfile             production image, data on a /data volume
+render.yaml            Render blueprint (web service + disk)
 lib/db.js              SQLite schema + seeding + password hashing
+lib/paths.js           storage layout (local vs /tmp vs mounted volume)
+lib/session-store.js   SQLite-backed express-session store
 lib/orders.js          order lifecycle, licence pricing, all purchase emails
 lib/payments.js        Mobile Money / bank config + demo auto-confirmation
 lib/mailer.js          nodemailer + the offline mailbox fallback
@@ -120,8 +126,9 @@ public/js/app.js       equalizer, audio player, checkout, polling
 scripts/               e2e test, demo audio generator, seed
 ```
 
-Uploads land in `public/uploads/{covers,audio,video}`. Swap that for S3/R2 or any object store
-before production — just change `lib/upload.js` and the `cover_image` / `audio_file` values.
+Uploads land in `public/uploads/{covers,audio,video}`, or in `UPLOAD_DIR` when one is set (in the
+container: `/data/uploads`). Swap that for S3/R2 or any object store before production — just
+change `lib/upload.js` and the `cover_image` / `audio_file` values.
 
 ---
 
@@ -145,6 +152,60 @@ emails and uploads a beat — printing a pass/fail line for each step.
 npm run demo-audio      # regenerate the four demo loops (synthesised 16-bit WAVs)
 rm data/producer.db*    # wipe and re-seed on next start
 ```
+
+## Deploying
+
+The repo ships config for both a serverless demo and a real, persistent host.
+`/healthz` returns JSON and is used by the container health check and by
+Render's health probe.
+
+### Option A — Vercel (`api/index.js` + `vercel.json`)
+
+Vercel doesn't run a `server.js` for you: without a function in `api/` it answers
+every path with its own `404 NOT_FOUND`. That is now wired up, so importing the
+repo just works:
+
+1. **New Project → import this repo.** Framework preset: *Other*. Build command:
+   empty. Output directory: `public` (already set in `vercel.json`).
+2. Node.js version **22.x** (needed by `node:sqlite`) — the `engines` field asks for it.
+3. Optional env vars: `SESSION_SECRET`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`,
+   `STUDIO_NAME`, `PAYMENTS_MODE`.
+
+How it behaves there:
+
+| Works | Limited |
+| --- | --- |
+| Storefront, beat pages, videos, search | The bundle is read-only, so the SQLite DB and uploads go to `/tmp` — **data resets on a cold start** |
+| Register / log in / dashboard (sessions are stored in SQLite) | Request bodies are capped at ~4.5 MB, so admin audio/video uploads fail |
+| Checkout, demo auto-confirmation, download links, admin area | Demo confirmations are settled lazily when the order is polled, because `setTimeout`s can be frozen |
+
+Treat Vercel as a shareable preview. For a store that keeps orders, use Option B.
+
+### Option B — Docker / Render / Fly / Railway (recommended)
+
+`Dockerfile`, `docker-compose.yml` and `render.yaml` are included.
+
+```bash
+docker compose up --build        # → http://localhost:3000, data in the studio-data volume
+```
+
+* The container stores everything under `/data` (`STUDIO_STORAGE_DIR=/data`,
+  `UPLOAD_DIR=/data/uploads`). Mount a volume there and redeploys keep the
+  database, the beat catalogue and uploaded art/audio.
+* **Render:** *New → Blueprint*, pick this repo — `render.yaml` creates the web
+  service, a 1 GB disk at `/data` and a generated `SESSION_SECRET`.
+* Any other host: run `npm ci --omit=dev && node server.js` with Node 22 and set
+  `STUDIO_STORAGE_DIR`/`UPLOAD_DIR` to a persistent volume.
+
+### Environment variables that matter in production
+
+| Variable | Why |
+| --- | --- |
+| `SESSION_SECRET` | Random string; cookies are signed with it |
+| `COOKIE_SECURE=true` | Force `Secure` cookies when TLS terminates at a proxy |
+| `PUBLIC_URL` | Absolute links inside emails |
+| `STUDIO_STORAGE_DIR` / `UPLOAD_DIR` | Point the database and uploads at the volume |
+| `DB_FILE` | Override just the SQLite path |
 
 ## Going live checklist
 

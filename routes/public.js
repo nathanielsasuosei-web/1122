@@ -1,10 +1,10 @@
 'use strict';
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const { all, get, run } = require('../lib/db');
 const orders = require('../lib/orders');
 const payments = require('../lib/payments');
+const paths = require('../lib/paths');
 
 module.exports = ({ flash }) => {
   const router = express.Router();
@@ -131,17 +131,24 @@ module.exports = ({ flash }) => {
   });
 
   /* ------------------------------------------------ order status polling */
-  router.get('/api/orders/:reference', (req, res) => {
-    const user = res.locals.currentUser;
-    if (!user) return res.status(401).json({ error: 'auth required' });
-    const order = get(
-      'SELECT o.reference, o.status, o.paid_at, o.download_token, o.user_id FROM orders o WHERE o.reference = ?',
-      req.params.reference
-    );
-    if (!order || (order.user_id !== user.id && user.role !== 'admin')) {
-      return res.status(404).json({ error: 'not found' });
+  router.get('/api/orders/:reference', async (req, res, next) => {
+    try {
+      const user = res.locals.currentUser;
+      if (!user) return res.status(401).json({ error: 'auth required' });
+      let order = get('SELECT * FROM orders WHERE reference = ?', req.params.reference);
+      if (!order || (order.user_id !== user.id && user.role !== 'admin')) {
+        return res.status(404).json({ error: 'not found' });
+      }
+      // Serverless-safe demo confirmation: the timer may have been frozen, so
+      // settle a due order right here instead of trusting setTimeout alone.
+      if (payments.isDue(order)) {
+        await orders.markPaid(req, order.reference);
+        order = get('SELECT * FROM orders WHERE reference = ?', order.reference);
+      }
+      res.json({ reference: order.reference, status: order.status, paid_at: order.paid_at });
+    } catch (err) {
+      next(err);
     }
-    res.json({ reference: order.reference, status: order.status, paid_at: order.paid_at });
   });
 
   /* ------------------------------------------------------------ download */
@@ -160,9 +167,8 @@ module.exports = ({ flash }) => {
       return res.status(404).render('error', { title: 'File missing', code: 404, message: 'The audio file for this beat has not been uploaded yet. Contact the studio.' });
     }
     run('UPDATE orders SET download_count = download_count + 1 WHERE id = ?', order.id);
-    const rel = beat.audio_file.replace(/^\/+/, '');
-    const abs = path.join(__dirname, '..', 'public', rel);
-    if (!abs.startsWith(path.join(__dirname, '..', 'public')) || !fs.existsSync(abs)) {
+    const abs = paths.resolveUpload(beat.audio_file);
+    if (!abs) {
       return res.status(404).render('error', { title: 'File missing', code: 404, message: 'The audio file could not be found on disk.' });
     }
     const ext = path.extname(abs);

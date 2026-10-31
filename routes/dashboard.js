@@ -1,7 +1,8 @@
 'use strict';
 const express = require('express');
 const { all, get, run } = require('../lib/db');
-const { LICENSES, sendMessageEmail } = require('../lib/orders');
+const { LICENSES, sendMessageEmail, markPaid } = require('../lib/orders');
+const payments = require('../lib/payments');
 
 module.exports = ({ flash }) => {
   const router = express.Router();
@@ -34,8 +35,11 @@ module.exports = ({ flash }) => {
     });
   });
 
-  router.get('/orders/:reference', (req, res, next) => {
+  router.get('/orders/:reference', async (req, res, next) => {
     const user = res.locals.currentUser;
+    // Settle a demo payment that came due while the server was busy or frozen.
+    const own = get('SELECT * FROM orders WHERE reference = ? AND user_id = ?', req.params.reference, user.id);
+    if (own && payments.isDue(own)) await markPaid(req, own.reference);
     const order = get(
       `SELECT o.*, b.title, b.cover_image, b.audio_file, b.bpm, b.musical_key, b.genre, b.description
          FROM orders o JOIN beats b ON b.id = o.beat_id
