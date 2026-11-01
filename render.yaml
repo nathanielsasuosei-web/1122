@@ -1,0 +1,29 @@
+# Render blueprint: https://render.com/docs/blueprint-spec
+# Deploy with "New → Blueprint" and point it at this repo.
+services:
+  - type: web
+    name: bassline-studio
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: STUDIO_STORAGE_DIR
+        value: /data
+      - key: UPLOAD_DIR
+        value: /data/uploads
+      - key: PAYMENTS_MODE
+        value: demo
+      # - key: ADMIN_EMAIL      # only read when the admin account is first created
+      #   value: you@example.com
+      # - key: ADMIN_PASSWORD
+      #   sync: false
+    disk:
+      name: bassline-data
+      mountPath: /data
+      sizeGB: 1

@@ -5,11 +5,11 @@ const path = require('path');
 const { all, get, run } = require('../lib/db');
 const orders = require('../lib/orders');
 const { uploader, safeImageValue } = require('../lib/upload');
+const paths = require('../lib/paths');
 const { sendMessageEmail, markPaid } = require('../lib/orders');
 const { isSmtpConfigured, smtpConfig } = require('../lib/mailer');
 const payments = require('../lib/payments');
 
-const PUBLIC = path.join(__dirname, '..', 'public');
 const rel = (f) => (f ? `/uploads/${f.destination.split(/[\\/]/).pop()}/${f.filename}` : null);
 
 module.exports = ({ flash }) => {
@@ -330,7 +330,9 @@ module.exports = ({ flash }) => {
 };
 
 function removeUpload(webPath) {
-  if (!webPath || !webPath.startsWith('/uploads/')) return;
-  const abs = path.join(PUBLIC, webPath);
-  if (abs.startsWith(PUBLIC) && fs.existsSync(abs)) fs.unlink(abs, () => {});
+  // Uploads live in public/uploads locally and on the mounted volume / /tmp elsewhere.
+  const abs = paths.resolveUpload(webPath);
+  if (!abs) return;
+  const writable = paths.inside(paths.UPLOAD_DIR, abs);
+  if (writable && fs.existsSync(abs)) fs.unlink(abs, () => {});
 }

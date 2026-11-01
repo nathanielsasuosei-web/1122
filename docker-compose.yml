@@ -1,0 +1,17 @@
+# Local production-like run: docker compose up --build
+services:
+  studio:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      SESSION_SECRET: change-this-to-a-long-random-string
+      PAYMENTS_MODE: demo
+      STUDIO_STORAGE_DIR: /data
+      UPLOAD_DIR: /data/uploads
+    volumes:
+      - studio-data:/data
+    restart: unless-stopped
+
+volumes:
+  studio-data:
